@@ -9,8 +9,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Plus, Pencil, Trash2, Star } from 'lucide-react';
+import type { Database } from '@/integrations/supabase/types';
 
-const categories = [
+type ProductCategory = Database['public']['Enums']['product_category'];
+
+const categories: { value: ProductCategory; label: string }[] = [
   { value: 'feed_supplements', label: 'Feed Supplements' },
   { value: 'dewormers', label: 'Dewormers' },
   { value: 'antibiotics', label: 'Antibiotics' },
@@ -22,16 +25,40 @@ const categories = [
   { value: 'other', label: 'Other' },
 ];
 
+interface FormData {
+  name: string;
+  category: ProductCategory;
+  composition: string;
+  indications: string;
+  dosage: string;
+  withdrawal_period: string;
+  presentation: string;
+  directions: string;
+  description: string;
+  is_featured: boolean;
+  is_new: boolean;
+}
+
+const defaultFormData: FormData = {
+  name: '',
+  category: 'other',
+  composition: '',
+  indications: '',
+  dosage: '',
+  withdrawal_period: '',
+  presentation: '',
+  directions: '',
+  description: '',
+  is_featured: false,
+  is_new: false
+};
+
 export function ProductsManager() {
   const [products, setProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
-  const [formData, setFormData] = useState({
-    name: '', category: 'other', composition: '', indications: '', dosage: '',
-    withdrawal_period: '', presentation: '', directions: '', description: '',
-    is_featured: false, is_new: false
-  });
+  const [formData, setFormData] = useState<FormData>(defaultFormData);
   const { toast } = useToast();
 
   useEffect(() => { fetchProducts(); }, []);
@@ -43,7 +70,10 @@ export function ProductsManager() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.name) { toast({ title: 'Error', description: 'Name is required', variant: 'destructive' }); return; }
+    if (!formData.name) { 
+      toast({ title: 'Error', description: 'Name is required', variant: 'destructive' }); 
+      return; 
+    }
     
     if (editingProduct) {
       await supabase.from('products').update(formData).eq('id', editingProduct.id);
@@ -54,13 +84,25 @@ export function ProductsManager() {
     }
     setIsDialogOpen(false);
     setEditingProduct(null);
-    setFormData({ name: '', category: 'other', composition: '', indications: '', dosage: '', withdrawal_period: '', presentation: '', directions: '', description: '', is_featured: false, is_new: false });
+    setFormData(defaultFormData);
     fetchProducts();
   };
 
   const handleEdit = (product: any) => {
     setEditingProduct(product);
-    setFormData(product);
+    setFormData({
+      name: product.name || '',
+      category: product.category || 'other',
+      composition: product.composition || '',
+      indications: product.indications || '',
+      dosage: product.dosage || '',
+      withdrawal_period: product.withdrawal_period || '',
+      presentation: product.presentation || '',
+      directions: product.directions || '',
+      description: product.description || '',
+      is_featured: product.is_featured || false,
+      is_new: product.is_new || false
+    });
     setIsDialogOpen(true);
   };
 
@@ -71,6 +113,12 @@ export function ProductsManager() {
     fetchProducts();
   };
 
+  const openNewProductDialog = () => {
+    setEditingProduct(null);
+    setFormData(defaultFormData);
+    setIsDialogOpen(true);
+  };
+
   if (isLoading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
 
   return (
@@ -79,7 +127,7 @@ export function ProductsManager() {
         <h1 className="text-2xl font-heading font-bold text-foreground">Products</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => { setEditingProduct(null); setFormData({ name: '', category: 'other', composition: '', indications: '', dosage: '', withdrawal_period: '', presentation: '', directions: '', description: '', is_featured: false, is_new: false }); }}>
+            <Button onClick={openNewProductDialog}>
               <Plus size={16} className="mr-2" /> Add Product
             </Button>
           </DialogTrigger>
@@ -89,26 +137,64 @@ export function ProductsManager() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
-                <div><Label>Name *</Label><Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} /></div>
-                <div><Label>Category</Label>
-                  <Select value={formData.category} onValueChange={v => setFormData({...formData, category: v})}>
+                <div>
+                  <Label>Name *</Label>
+                  <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                </div>
+                <div>
+                  <Label>Category</Label>
+                  <Select 
+                    value={formData.category} 
+                    onValueChange={(v: ProductCategory) => setFormData({...formData, category: v})}
+                  >
                     <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{categories.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
+                    <SelectContent>
+                      {categories.map(c => (
+                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
               </div>
-              <div><Label>Description</Label><Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
-              <div><Label>Composition</Label><Textarea value={formData.composition} onChange={e => setFormData({...formData, composition: e.target.value})} /></div>
-              <div><Label>Indications</Label><Textarea value={formData.indications} onChange={e => setFormData({...formData, indications: e.target.value})} /></div>
-              <div className="grid grid-cols-2 gap-4">
-                <div><Label>Dosage</Label><Input value={formData.dosage} onChange={e => setFormData({...formData, dosage: e.target.value})} /></div>
-                <div><Label>Withdrawal Period</Label><Input value={formData.withdrawal_period} onChange={e => setFormData({...formData, withdrawal_period: e.target.value})} /></div>
+              <div>
+                <Label>Description</Label>
+                <Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
               </div>
-              <div><Label>Presentation</Label><Input value={formData.presentation} onChange={e => setFormData({...formData, presentation: e.target.value})} /></div>
-              <div><Label>Directions</Label><Textarea value={formData.directions} onChange={e => setFormData({...formData, directions: e.target.value})} /></div>
+              <div>
+                <Label>Composition</Label>
+                <Textarea value={formData.composition} onChange={e => setFormData({...formData, composition: e.target.value})} />
+              </div>
+              <div>
+                <Label>Indications</Label>
+                <Textarea value={formData.indications} onChange={e => setFormData({...formData, indications: e.target.value})} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Dosage</Label>
+                  <Input value={formData.dosage} onChange={e => setFormData({...formData, dosage: e.target.value})} />
+                </div>
+                <div>
+                  <Label>Withdrawal Period</Label>
+                  <Input value={formData.withdrawal_period} onChange={e => setFormData({...formData, withdrawal_period: e.target.value})} />
+                </div>
+              </div>
+              <div>
+                <Label>Presentation</Label>
+                <Input value={formData.presentation} onChange={e => setFormData({...formData, presentation: e.target.value})} />
+              </div>
+              <div>
+                <Label>Directions</Label>
+                <Textarea value={formData.directions} onChange={e => setFormData({...formData, directions: e.target.value})} />
+              </div>
               <div className="flex gap-4">
-                <label className="flex items-center gap-2"><input type="checkbox" checked={formData.is_featured} onChange={e => setFormData({...formData, is_featured: e.target.checked})} /> Featured</label>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={formData.is_new} onChange={e => setFormData({...formData, is_new: e.target.checked})} /> New</label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" checked={formData.is_featured} onChange={e => setFormData({...formData, is_featured: e.target.checked})} />
+                  Featured
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" checked={formData.is_new} onChange={e => setFormData({...formData, is_new: e.target.checked})} />
+                  New
+                </label>
               </div>
               <Button onClick={handleSubmit}>{editingProduct ? 'Update' : 'Create'} Product</Button>
             </div>
