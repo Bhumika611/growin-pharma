@@ -1,0 +1,139 @@
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, Plus, Pencil, Trash2, Star } from 'lucide-react';
+
+const categories = [
+  { value: 'feed_supplements', label: 'Feed Supplements' },
+  { value: 'dewormers', label: 'Dewormers' },
+  { value: 'antibiotics', label: 'Antibiotics' },
+  { value: 'liver_tonics', label: 'Liver Tonics' },
+  { value: 'mineral_mixtures', label: 'Mineral Mixtures' },
+  { value: 'injections', label: 'Injections' },
+  { value: 'calcium', label: 'Calcium' },
+  { value: 'vitamins', label: 'Vitamins' },
+  { value: 'other', label: 'Other' },
+];
+
+export function ProductsManager() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    name: '', category: 'other', composition: '', indications: '', dosage: '',
+    withdrawal_period: '', presentation: '', directions: '', description: '',
+    is_featured: false, is_new: false
+  });
+  const { toast } = useToast();
+
+  useEffect(() => { fetchProducts(); }, []);
+
+  const fetchProducts = async () => {
+    const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+    setProducts(data || []);
+    setIsLoading(false);
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.name) { toast({ title: 'Error', description: 'Name is required', variant: 'destructive' }); return; }
+    
+    if (editingProduct) {
+      await supabase.from('products').update(formData).eq('id', editingProduct.id);
+      toast({ title: 'Product updated' });
+    } else {
+      await supabase.from('products').insert([formData]);
+      toast({ title: 'Product created' });
+    }
+    setIsDialogOpen(false);
+    setEditingProduct(null);
+    setFormData({ name: '', category: 'other', composition: '', indications: '', dosage: '', withdrawal_period: '', presentation: '', directions: '', description: '', is_featured: false, is_new: false });
+    fetchProducts();
+  };
+
+  const handleEdit = (product: any) => {
+    setEditingProduct(product);
+    setFormData(product);
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this product?')) return;
+    await supabase.from('products').delete().eq('id', id);
+    toast({ title: 'Product deleted' });
+    fetchProducts();
+  };
+
+  if (isLoading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-heading font-bold text-foreground">Products</h1>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => { setEditingProduct(null); setFormData({ name: '', category: 'other', composition: '', indications: '', dosage: '', withdrawal_period: '', presentation: '', directions: '', description: '', is_featured: false, is_new: false }); }}>
+              <Plus size={16} className="mr-2" /> Add Product
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editingProduct ? 'Edit Product' : 'Add Product'}</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Name *</Label><Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} /></div>
+                <div><Label>Category</Label>
+                  <Select value={formData.category} onValueChange={v => setFormData({...formData, category: v})}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{categories.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div><Label>Description</Label><Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
+              <div><Label>Composition</Label><Textarea value={formData.composition} onChange={e => setFormData({...formData, composition: e.target.value})} /></div>
+              <div><Label>Indications</Label><Textarea value={formData.indications} onChange={e => setFormData({...formData, indications: e.target.value})} /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Dosage</Label><Input value={formData.dosage} onChange={e => setFormData({...formData, dosage: e.target.value})} /></div>
+                <div><Label>Withdrawal Period</Label><Input value={formData.withdrawal_period} onChange={e => setFormData({...formData, withdrawal_period: e.target.value})} /></div>
+              </div>
+              <div><Label>Presentation</Label><Input value={formData.presentation} onChange={e => setFormData({...formData, presentation: e.target.value})} /></div>
+              <div><Label>Directions</Label><Textarea value={formData.directions} onChange={e => setFormData({...formData, directions: e.target.value})} /></div>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2"><input type="checkbox" checked={formData.is_featured} onChange={e => setFormData({...formData, is_featured: e.target.checked})} /> Featured</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={formData.is_new} onChange={e => setFormData({...formData, is_new: e.target.checked})} /> New</label>
+              </div>
+              <Button onClick={handleSubmit}>{editingProduct ? 'Update' : 'Create'} Product</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="grid gap-4">
+        {products.map(product => (
+          <div key={product.id} className="bg-card border border-border rounded-xl p-4 flex justify-between items-center">
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-heading font-semibold">{product.name}</h3>
+                {product.is_featured && <Badge variant="secondary"><Star size={12} className="mr-1" />Featured</Badge>}
+                {product.is_new && <Badge>New</Badge>}
+              </div>
+              <p className="text-sm text-muted-foreground capitalize">{product.category?.replace('_', ' ')}</p>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => handleEdit(product)}><Pencil size={14} /></Button>
+              <Button size="sm" variant="destructive" onClick={() => handleDelete(product.id)}><Trash2 size={14} /></Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
