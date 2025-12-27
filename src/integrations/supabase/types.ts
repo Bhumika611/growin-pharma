@@ -14,16 +14,190 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      company_settings: {
+        Row: {
+          about_text: string | null
+          address: string | null
+          company_name: string
+          created_at: string
+          email: string | null
+          id: string
+          owner_name: string | null
+          phone: string | null
+          tagline: string | null
+          updated_at: string
+        }
+        Insert: {
+          about_text?: string | null
+          address?: string | null
+          company_name?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          owner_name?: string | null
+          phone?: string | null
+          tagline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          about_text?: string | null
+          address?: string | null
+          company_name?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          owner_name?: string | null
+          phone?: string | null
+          tagline?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      enquiries: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          email: string
+          enquiry_type: string
+          id: string
+          is_read: boolean | null
+          message: string
+          name: string
+          phone: string | null
+          product_interest: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          email: string
+          enquiry_type?: string
+          id?: string
+          is_read?: boolean | null
+          message: string
+          name: string
+          phone?: string | null
+          product_interest?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          email?: string
+          enquiry_type?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          name?: string
+          phone?: string | null
+          product_interest?: string | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category: Database["public"]["Enums"]["product_category"]
+          composition: string | null
+          created_at: string
+          description: string | null
+          directions: string | null
+          dosage: string | null
+          id: string
+          image_url: string | null
+          indications: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_new: boolean | null
+          name: string
+          presentation: string | null
+          species: string[] | null
+          updated_at: string
+          withdrawal_period: string | null
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["product_category"]
+          composition?: string | null
+          created_at?: string
+          description?: string | null
+          directions?: string | null
+          dosage?: string | null
+          id?: string
+          image_url?: string | null
+          indications?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          name: string
+          presentation?: string | null
+          species?: string[] | null
+          updated_at?: string
+          withdrawal_period?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["product_category"]
+          composition?: string | null
+          created_at?: string
+          description?: string | null
+          directions?: string | null
+          dosage?: string | null
+          id?: string
+          image_url?: string | null
+          indications?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          name?: string
+          presentation?: string | null
+          species?: string[] | null
+          updated_at?: string
+          withdrawal_period?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      product_category:
+        | "feed_supplements"
+        | "dewormers"
+        | "antibiotics"
+        | "liver_tonics"
+        | "mineral_mixtures"
+        | "injections"
+        | "calcium"
+        | "vitamins"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +324,19 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      product_category: [
+        "feed_supplements",
+        "dewormers",
+        "antibiotics",
+        "liver_tonics",
+        "mineral_mixtures",
+        "injections",
+        "calcium",
+        "vitamins",
+        "other",
+      ],
+    },
   },
 } as const
