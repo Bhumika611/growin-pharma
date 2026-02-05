@@ -1,103 +1,73 @@
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Beaker, Target, Pill, Dog, Clock, Package } from 'lucide-react';
+import { ArrowLeft, Beaker, Target, Pill, Dog, Clock, Package, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-// Sample product data - in production this would come from a database
-const productData: Record<string, {
-  name: string;
-  category: string;
-  image: string;
-  description: string;
-  composition: string[];
-  indications: string[];
-  dosage: string;
-  species: string[];
-  withdrawalPeriod: string;
-  presentation: string;
-}> = {
-  '1': {
-    name: 'CalciMax Plus',
-    category: 'Feed Supplements',
-    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&h=600&fit=crop',
-    description: 'Premium calcium and phosphorus supplement formulated for optimal bone health, growth, and production in cattle, poultry, and other livestock.',
-    composition: [
-      'Calcium (as Calcium Carbonate) - 25%',
-      'Phosphorus (as Dicalcium Phosphate) - 12%',
-      'Vitamin D3 - 50,000 IU/kg',
-      'Vitamin B12 - 100 mcg/kg',
-    ],
-    indications: [
-      'Calcium deficiency and metabolic disorders',
-      'Milk fever prevention',
-      'Improved bone development in growing animals',
-      'Enhanced eggshell quality in poultry',
-      'Post-partum recovery support',
-    ],
-    dosage: 'Cattle: 50-100g per day. Poultry: 500g per 100 birds daily. Mix with feed or administer orally.',
-    species: ['Cattle', 'Buffalo', 'Goat', 'Sheep', 'Poultry'],
-    withdrawalPeriod: 'Nil',
-    presentation: '1 kg, 5 kg, and 25 kg packs',
-  },
-  '2': {
-    name: 'VitaGrow 500',
-    category: 'Feed Supplements',
-    image: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=800&h=600&fit=crop',
-    description: 'Complete vitamin complex designed to enhance growth rates, improve immunity, and support overall health in all livestock species.',
-    composition: [
-      'Vitamin A - 500,000 IU/kg',
-      'Vitamin D3 - 100,000 IU/kg',
-      'Vitamin E - 1,000 mg/kg',
-      'B-Complex Vitamins',
-      'Biotin - 50 mg/kg',
-    ],
-    indications: [
-      'Vitamin deficiency syndromes',
-      'Growth promotion',
-      'Immune system support',
-      'Stress management',
-      'Recovery from disease',
-    ],
-    dosage: 'Large animals: 20-30g daily. Poultry: 250g per 100 birds. Pigs: 10-15g per animal.',
-    species: ['Cattle', 'Buffalo', 'Poultry', 'Pigs', 'Goats'],
-    withdrawalPeriod: 'Nil',
-    presentation: '500g, 1 kg, and 5 kg packs',
-  },
-  '3': {
-    name: 'DeWorm Pro',
-    category: 'Dewormers',
-    image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&h=600&fit=crop',
-    description: 'Broad-spectrum anthelmintic effective against all common gastrointestinal parasites including roundworms, tapeworms, and flukes.',
-    composition: [
-      'Albendazole - 600 mg/bolus',
-      'Praziquantel - 25 mg/bolus',
-    ],
-    indications: [
-      'Gastrointestinal nematodes',
-      'Lungworms',
-      'Liver flukes',
-      'Tapeworms',
-      'Mixed parasitic infections',
-    ],
-    dosage: 'Cattle/Buffalo: 1 bolus per 100 kg body weight. Repeat after 21 days if necessary.',
-    species: ['Cattle', 'Buffalo', 'Goat', 'Sheep'],
-    withdrawalPeriod: 'Meat: 14 days, Milk: 5 days',
-    presentation: 'Strip of 4 boluses',
-  },
-};
-
-const sectionIcons = {
-  composition: Beaker,
-  indications: Target,
-  dosage: Pill,
-  species: Dog,
-  withdrawalPeriod: Clock,
-  presentation: Package,
-};
+import { supabase } from '@/integrations/supabase/client';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
-  const product = id ? productData[id] : null;
+  const [product, setProduct] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProduct() {
+      if (!id) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching product:', error);
+          setIsLoading(false);
+          return;
+        }
+
+        if (data) {
+          const formattedProduct = {
+            name: data.name,
+            category: data.category.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+            image: data.image_url || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&h=600&fit=crop',
+            description: data.description || '',
+            composition: data.composition ? data.composition.split('\n').filter((i: string) => i.trim()) : [],
+            indications: data.indications ? data.indications.split('\n').filter((i: string) => i.trim()) : [],
+            dosage: data.dosage || '',
+            species: data.species || [],
+            withdrawalPeriod: data.withdrawal_period || 'Nil',
+            presentation: data.presentation || '',
+          };
+          setProduct(formattedProduct);
+        }
+      } catch (err) {
+        console.error('Error:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchProduct();
+  }, [id]);
+
+  const sectionIcons = {
+    composition: Beaker,
+    indications: Target,
+    dosage: Pill,
+    species: Dog,
+    withdrawalPeriod: Clock,
+    presentation: Package,
+  };
+
+  if (isLoading) {
+    return (
+      <main className="pt-24 pb-16 min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </main>
+    );
+  }
 
   if (!product) {
     return (
@@ -249,13 +219,13 @@ export default function ProductDetail() {
   );
 }
 
-function DetailSection({ 
-  icon: Icon, 
-  title, 
-  items 
-}: { 
-  icon: React.ComponentType<{ className?: string }>; 
-  title: string; 
+function DetailSection({
+  icon: Icon,
+  title,
+  items
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
   items: string[];
 }) {
   return (
@@ -280,13 +250,13 @@ function DetailSection({
   );
 }
 
-function DetailCard({ 
-  icon: Icon, 
-  title, 
-  content 
-}: { 
-  icon: React.ComponentType<{ className?: string }>; 
-  title: string; 
+function DetailCard({
+  icon: Icon,
+  title,
+  content
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
   content: string;
 }) {
   return (

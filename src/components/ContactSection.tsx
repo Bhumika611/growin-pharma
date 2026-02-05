@@ -1,56 +1,86 @@
 import { motion } from 'framer-motion';
-import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-
-const contactInfo = [
-  {
-    icon: MapPin,
-    label: 'Address',
-    value: '123 Pharma Street, Industrial Area, City - 000000',
-  },
-  {
-    icon: Phone,
-    label: 'Phone',
-    value: '+91 98765 43210',
-  },
-  {
-    icon: Mail,
-    label: 'Email',
-    value: 'info@growinpharma.com',
-  },
-  {
-    icon: Clock,
-    label: 'Working Hours',
-    value: 'Mon - Sat: 9:00 AM - 6:00 PM',
-  },
-];
+import { useSettings } from '@/contexts/SettingsContext';
+import { supabase } from '@/integrations/supabase/client';
 
 export function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { settings } = useSettings();
+
+  const contactInfo = [
+    {
+      icon: User,
+      label: 'Owner',
+      value: settings?.owner_name || 'Vegina Suresh Kumar',
+    },
+    {
+      icon: MapPin,
+      label: 'Address',
+      value: settings?.address || '123 Pharma Street, Industrial Area, City - 000000',
+    },
+    {
+      icon: Phone,
+      label: 'Phone',
+      value: settings?.phone || '+91 98765 43210',
+    },
+    {
+      icon: Mail,
+      label: 'Email',
+      value: settings?.email || 'info@growinpharma.com',
+    },
+    {
+      icon: Clock,
+      label: 'Working Hours',
+      value: 'Mon - Sat: 9:00 AM - 6:00 PM',
+    },
+  ];
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for contacting us. We'll get back to you soon.",
-    });
-    
-    setIsSubmitting(false);
-    (e.target as HTMLFormElement).reset();
+
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      name: formData.get('name') as string,
+      phone: formData.get('phone') as string,
+      email: formData.get('email') as string,
+      message: `${formData.get('subject')}\n\n${formData.get('message')}`,
+      enquiry_type: 'contact_form',
+    };
+
+    try {
+      const { error } = await supabase
+        .from('enquiries')
+        .insert([data]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for contacting us. We'll get back to you soon.",
+      });
+
+      (e.target as HTMLFormElement).reset();
+    } catch (error: any) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <section id="contact" className="py-24 bg-background">
+    <section id="contact" className="py-24 bg-background relative overflow-hidden">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -66,7 +96,7 @@ export function ContactSection() {
             Get in Touch
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Have questions about our products? We're here to help you find 
+            Have questions about our products? We're here to help you find
             the right solutions for your livestock needs.
           </p>
         </motion.div>
@@ -98,7 +128,13 @@ export function ContactSection() {
                     </div>
                     <div>
                       <div className="text-sm text-muted-foreground">{item.label}</div>
-                      <div className="font-medium text-foreground">{item.value}</div>
+                      {item.label === 'Phone' ? (
+                        <a href={`tel:${item.value.replace(/\s+/g, '')}`} className="font-medium text-foreground hover:text-primary transition-colors">
+                          {item.value}
+                        </a>
+                      ) : (
+                        <div className="font-medium text-foreground">{item.value}</div>
+                      )}
                     </div>
                   </motion.div>
                 ))}
@@ -113,9 +149,11 @@ export function ContactSection() {
               <p className="text-muted-foreground text-sm mb-4">
                 Our veterinary experts are available for urgent consultations.
               </p>
-              <Button variant="default" className="w-full sm:w-auto">
-                <Phone className="w-4 h-4 mr-2" />
-                Call Now
+              <Button variant="default" className="w-full sm:w-auto" asChild>
+                <a href="tel:+919949766299">
+                  <Phone className="w-4 h-4 mr-2" />
+                  Call Now
+                </a>
               </Button>
             </div>
           </motion.div>
@@ -130,16 +168,17 @@ export function ContactSection() {
               <h3 className="font-heading font-bold text-2xl text-foreground mb-6">
                 Send us a Message
               </h3>
-              
+
               <div className="space-y-5">
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
                       Full Name
                     </label>
-                    <Input 
-                      placeholder="John Doe" 
-                      required 
+                    <Input
+                      name="name"
+                      placeholder="John Doe"
+                      required
                       className="h-12"
                     />
                   </div>
@@ -147,54 +186,58 @@ export function ContactSection() {
                     <label className="block text-sm font-medium text-foreground mb-2">
                       Phone Number
                     </label>
-                    <Input 
-                      type="tel" 
-                      placeholder="+91 98765 43210" 
-                      required 
+                    <Input
+                      name="phone"
+                      type="tel"
+                      placeholder="+91 98765 43210"
+                      required
                       className="h-12"
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
                     Email Address
                   </label>
-                  <Input 
-                    type="email" 
-                    placeholder="john@example.com" 
-                    required 
+                  <Input
+                    name="email"
+                    type="email"
+                    placeholder="john@example.com"
+                    required
                     className="h-12"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
                     Subject
                   </label>
-                  <Input 
-                    placeholder="How can we help you?" 
-                    required 
+                  <Input
+                    name="subject"
+                    placeholder="How can we help you?"
+                    required
                     className="h-12"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
                     Message
                   </label>
-                  <Textarea 
-                    placeholder="Tell us more about your requirements..." 
-                    required 
+                  <Textarea
+                    name="message"
+                    placeholder="Tell us more about your requirements..."
+                    required
                     rows={5}
                     className="resize-none"
                   />
                 </div>
-                
-                <Button 
-                  type="submit" 
-                  variant="hero" 
-                  size="lg" 
+
+                <Button
+                  type="submit"
+                  variant="hero"
+                  size="lg"
                   className="w-full"
                   disabled={isSubmitting}
                 >

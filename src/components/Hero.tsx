@@ -3,12 +3,23 @@ import { Link } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import bottleImage from '@/assets/calcium-bottle.png';
+import { DoodleBackground } from './DoodleBackground';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export function Hero() {
+  const { settings } = useSettings();
+
   const scrollToProducts = () => {
     const productsSection = document.getElementById('products');
     if (productsSection) {
       productsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const scrollToContact = () => {
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -20,6 +31,8 @@ export function Hero() {
         <div className="absolute bottom-1/4 -left-48 w-[500px] h-[500px] bg-primary/4 rounded-full blur-[100px]" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-gradient-radial from-primary/3 to-transparent rounded-full opacity-60" />
       </div>
+
+      <DoodleBackground />
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="flex flex-col items-center text-center">
@@ -33,7 +46,7 @@ export function Hero() {
             {/* GROWIN Text with Bottle as "I" - Premium Logo Treatment */}
             <div className="relative mb-2 md:mb-4">
               {/* Main Logo Container */}
-              <h1 className="font-heading font-extrabold text-[3rem] sm:text-[4.5rem] md:text-[6.5rem] lg:text-[8.5rem] xl:text-[10rem] leading-none tracking-tight text-foreground flex items-end justify-center">
+              <h1 className="font-heading font-extrabold text-[3rem] sm:text-[4.5rem] md:text-[6rem] lg:text-[7.5rem] xl:text-[9.5rem] leading-none tracking-tight text-foreground flex items-center justify-center relative translate-y-3 md:translate-y-6">
                 {/* GROW - appears first */}
                 <motion.span
                   initial={{ opacity: 0, x: -30 }}
@@ -43,89 +56,74 @@ export function Hero() {
                 >
                   GROW
                 </motion.span>
-                
-                {/* Bottle as "I" - organically integrated */}
+
                 <motion.span
                   initial={{ opacity: 0, y: 40, scale: 0.9 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ 
-                    duration: 0.8, 
+                  transition={{
+                    duration: 0.8,
                     delay: 0.6,
                     ease: [0.25, 0.46, 0.45, 0.94]
                   }}
-                  className="inline-flex items-end justify-center relative"
+                  className="inline-flex items-center justify-center relative"
                   style={{
-                    width: 'clamp(22px, 3.2vw, 48px)',
-                    marginLeft: 'clamp(-6px, -0.5vw, -3px)',
-                    marginRight: 'clamp(-6px, -0.5vw, -3px)',
+                    width: 'clamp(40px, 7vw, 130px)',
+                    marginLeft: 'clamp(-12px, -1.2vw, -6px)',
+                    marginRight: 'clamp(-12px, -1.2vw, -6px)',
+                    zIndex: 20
                   }}
                 >
                   {/* Soft glow behind bottle */}
-                  <div 
-                    className="absolute inset-0 rounded-full blur-2xl opacity-50"
+                  <div
+                    className="absolute inset-0 rounded-full blur-3xl opacity-50"
                     style={{
-                      background: 'radial-gradient(ellipse at center, hsl(var(--primary) / 0.35) 0%, transparent 70%)',
-                      transform: 'scale(3) translateY(5%)',
+                      background: 'radial-gradient(ellipse at center, hsl(var(--primary) / 0.5) 0%, transparent 70%)',
+                      transform: 'scale(4)',
                     }}
                   />
-                  
-                  {/* Shadow beneath bottle for depth */}
-                  <div 
-                    className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[70%] h-[8px] rounded-full opacity-25"
-                    style={{
-                      background: 'radial-gradient(ellipse at center, hsl(var(--foreground) / 0.5) 0%, transparent 70%)',
-                      filter: 'blur(3px)',
-                    }}
-                  />
-                  
-                  {/* The Bottle - sized to match typography baseline & cap height */}
+
+                  {/* The Bottle - sized to pop out like the JUICY reference image */}
                   <motion.div
                     className="relative z-10"
                     style={{
-                      height: 'clamp(48px, 7vw, 140px)',
+                      height: 'clamp(130px, 19vw, 400px)',
                       display: 'flex',
-                      alignItems: 'flex-end',
+                      alignItems: 'center',
                     }}
-                    animate={{ y: [0, -6, 0] }}
-                    transition={{ 
-                      duration: 5, 
-                      repeat: Infinity, 
-                      ease: "easeInOut" 
+                    animate={{
+                      y: [0, -10, 0],
+                      rotate: [0, 1, 0, -1, 0]
+                    }}
+                    transition={{
+                      y: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+                      rotate: { duration: 10, repeat: Infinity, ease: "easeInOut" }
                     }}
                   >
                     <motion.img
                       src={bottleImage}
                       alt="Premium calcium supplement"
-                      className="h-full w-auto object-contain"
+                      className="h-full w-auto object-contain select-none"
                       style={{
-                        filter: 'drop-shadow(0 6px 16px rgba(0, 0, 0, 0.18)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))',
+                        filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.25)) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15))',
                       }}
-                      whileHover={{ 
-                        scale: 1.04,
-                        filter: 'drop-shadow(0 10px 24px rgba(13, 148, 136, 0.3)) drop-shadow(0 3px 8px rgba(0, 0, 0, 0.12))',
+                      whileHover={{
+                        scale: 1.05,
+                        filter: 'drop-shadow(0 25px 50px rgba(13, 148, 136, 0.35)) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2))',
                       }}
-                      transition={{ duration: 0.3 }}
+                      transition={{ duration: 0.4 }}
                     />
-                    
-                    {/* Subtle shine effect on bottle */}
-                    <motion.div
-                      className="absolute top-[8%] left-[15%] w-[25%] h-[35%] rounded-full pointer-events-none"
+
+                    {/* Shadow beneath bottle for depth */}
+                    <div
+                      className="absolute -bottom-[5%] left-1/2 -translate-x-1/2 w-[85%] h-[20px] rounded-full opacity-40"
                       style={{
-                        background: 'linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 100%)',
-                        filter: 'blur(3px)',
-                      }}
-                      animate={{
-                        opacity: [0.25, 0.5, 0.25],
-                      }}
-                      transition={{
-                        duration: 4,
-                        repeat: Infinity,
-                        ease: "easeInOut",
+                        background: 'radial-gradient(ellipse at center, hsl(var(--foreground) / 0.7) 0%, transparent 80%)',
+                        filter: 'blur(8px)',
                       }}
                     />
                   </motion.div>
                 </motion.span>
-                
+
                 {/* N - appears with GROW */}
                 <motion.span
                   initial={{ opacity: 0, x: 30 }}
@@ -136,13 +134,13 @@ export function Hero() {
                   N
                 </motion.span>
               </h1>
-              
+
               {/* PHARMA - refined typography with letter spacing */}
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.9 }}
-                className="font-heading font-medium text-[1.2rem] sm:text-[1.8rem] md:text-[2.5rem] lg:text-[3.2rem] xl:text-[3.8rem] tracking-[0.4em] text-primary mt-0 md:mt-1"
+                className="font-heading font-medium text-[1.1rem] sm:text-[1.6rem] md:text-[2.2rem] lg:text-[2.8rem] xl:text-[3.4rem] tracking-[0.4em] text-primary -mt-4 md:-mt-8"
               >
                 PHARMA
               </motion.h2>
@@ -155,7 +153,7 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 1.1 }}
               className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground font-body font-light mt-6 md:mt-10 mb-8 md:mb-12"
             >
-              Caring Your <span className="text-primary font-medium">Livestock</span>
+              {settings?.tagline || "Caring Your Livestock"}
             </motion.p>
 
             {/* CTA Buttons */}
@@ -170,11 +168,14 @@ export function Hero() {
                   Explore Products
                 </Button>
               </Link>
-              <Link to="/contact">
-                <Button variant="outline" size="lg" className="min-w-[180px] font-heading font-semibold border-2 hover:bg-primary/5">
-                  Contact Us
-                </Button>
-              </Link>
+              <Button
+                variant="outline"
+                size="lg"
+                className="min-w-[180px] font-heading font-semibold border-2 hover:bg-primary/5 cursor-pointer"
+                onClick={scrollToContact}
+              >
+                Contact Us
+              </Button>
             </motion.div>
           </motion.div>
         </div>
@@ -196,6 +197,6 @@ export function Hero() {
           <ChevronDown size={20} strokeWidth={1.5} />
         </motion.div>
       </motion.button>
-    </section>
+    </section >
   );
 }

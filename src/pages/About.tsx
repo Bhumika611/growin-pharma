@@ -41,7 +41,7 @@ export default function About() {
           <div className="absolute top-1/4 -right-32 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 -left-32 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         </div>
-        
+
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -55,8 +55,8 @@ export default function About() {
               Pioneering Animal Health Excellence
             </h1>
             <p className="text-muted-foreground text-xl leading-relaxed">
-              Growin Pharma is a leading veterinary pharmaceutical company dedicated 
-              to developing innovative solutions that enhance livestock health and 
+              Growin Pharma is a leading veterinary pharmaceutical company dedicated
+              to developing innovative solutions that enhance livestock health and
               support sustainable farming practices.
             </p>
           </motion.div>
@@ -80,17 +80,17 @@ export default function About() {
               </h2>
               <div className="space-y-4 text-muted-foreground text-lg leading-relaxed">
                 <p>
-                  Founded with a vision to transform veterinary healthcare, Growin Pharma 
+                  Founded with a vision to transform veterinary healthcare, Growin Pharma
                   has grown from a small startup to a trusted name in animal pharmaceuticals.
                 </p>
                 <p>
-                  Our journey began with a simple belief: that every farmer deserves access 
-                  to high-quality, affordable veterinary products. Today, we serve thousands 
+                  Our journey began with a simple belief: that every farmer deserves access
+                  to high-quality, affordable veterinary products. Today, we serve thousands
                   of farmers across the country with our comprehensive range of solutions.
                 </p>
                 <p>
-                  With a team of experienced veterinary professionals and pharmaceutical 
-                  experts, we continue to innovate and develop products that make a real 
+                  With a team of experienced veterinary professionals and pharmaceutical
+                  experts, we continue to innovate and develop products that make a real
                   difference in animal health outcomes.
                 </p>
               </div>
@@ -128,6 +128,70 @@ export default function About() {
         </div>
       </section>
 
+      {/* Founder Section */}
+      <section className="py-20 bg-muted/30 overflow-hidden">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="relative order-2 lg:order-1"
+            >
+              <div className="relative z-10 rounded-3xl overflow-hidden border-8 border-background shadow-2xl">
+                <img
+                  src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800"
+                  alt="Vegina Suresh Kumar"
+                  className="w-full h-[500px] object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute bottom-8 left-8 right-8 text-white">
+                  <h3 className="text-2xl font-bold font-heading">Vegina Suresh Kumar</h3>
+                  <p className="text-primary-foreground opacity-90">Owner & Founder, Growin Pharma</p>
+                </div>
+              </div>
+              {/* Decorative elements */}
+              <div className="absolute -top-6 -left-6 w-32 h-32 bg-primary/20 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="order-1 lg:order-2"
+            >
+              <span className="text-primary font-semibold text-sm tracking-wider uppercase">
+                Meet Our Founder
+              </span>
+              <h2 className="font-heading font-bold text-4xl text-foreground mt-3 mb-6">
+                Visionary Leadership & 25+ Years of Expertise
+              </h2>
+              <div className="space-y-6 text-muted-foreground text-lg leading-relaxed">
+                <p>
+                  <span className="text-foreground font-semibold">Vegina Suresh Kumar</span>, the owner of <span className="text-primary font-bold">GROWIN PHARMA</span>,
+                  brings over <span className="text-foreground font-bold italic">25 years of profound experience</span> in the pharmaceutical industry.
+                  His deep understanding of pharmaceutical manufacturing and veterinary medicine has been the driving force behind the company's success.
+                </p>
+                <p>
+                  Throughout his career, he has been dedicated to bridging the gap between advanced pharmaceutical research and practical field applications.
+                  His vision is to empower farmers by providing high-quality, scientifically-backed veterinary products that ensure animal health and agricultural prosperity.
+                </p>
+                <p>
+                  Under his guidance, Growin Pharma has implemented state-of-the-art quality control systems and foster a culture of constant innovation,
+                  making the company a trusted partner for veterinary professionals and farmers alike across the nation.
+                </p>
+                <div className="flex items-center gap-4 pt-4">
+                  <div className="flex-1 h-[1px] bg-border" />
+                  <Award className="text-primary w-6 h-6 shrink-0" />
+                  <div className="flex-1 h-[1px] bg-border" />
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* Mission & Vision */}
       <section className="py-20 bg-muted/50">
         <div className="container mx-auto px-4 lg:px-8">
@@ -145,8 +209,8 @@ export default function About() {
                 Our Mission
               </h3>
               <p className="text-muted-foreground text-lg leading-relaxed">
-                To provide farmers with high-quality, affordable veterinary pharmaceutical 
-                products that improve animal health, enhance productivity, and contribute 
+                To provide farmers with high-quality, affordable veterinary pharmaceutical
+                products that improve animal health, enhance productivity, and contribute
                 to sustainable agricultural practices.
               </p>
             </motion.div>
@@ -165,8 +229,8 @@ export default function About() {
                 Our Vision
               </h3>
               <p className="text-muted-foreground text-lg leading-relaxed">
-                To become the most trusted veterinary pharmaceutical partner for farmers 
-                across India, known for innovation, quality, and unwavering commitment 
+                To become the most trusted veterinary pharmaceutical partner for farmers
+                across India, known for innovation, quality, and unwavering commitment
                 to animal welfare.
               </p>
             </motion.div>
@@ -217,14 +281,14 @@ export default function About() {
       </section>
 
       {/* Stats */}
-      <section className="py-20 bg-foreground text-background">
+      <section className="py-20 bg-background text-foreground border-t border-border/50">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               { value: '50+', label: 'Products' },
               { value: '10K+', label: 'Happy Farmers' },
               { value: '15+', label: 'States Covered' },
-              { value: '8+', label: 'Years Experience' },
+              { value: '25+', label: 'Years Leadership' },
             ].map((stat, index) => (
               <motion.div
                 key={stat.label}
@@ -237,7 +301,7 @@ export default function About() {
                 <div className="font-heading font-bold text-5xl md:text-6xl text-primary mb-2">
                   {stat.value}
                 </div>
-                <div className="text-background/70">{stat.label}</div>
+                <div className="text-muted-foreground">{stat.label}</div>
               </motion.div>
             ))}
           </div>

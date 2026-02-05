@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion';
 import { ContactSection } from '@/components/ContactSection';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export default function Contact() {
+  const { settings } = useSettings();
+
   return (
     <main className="pt-24 pb-0 min-h-screen bg-background">
       {/* Hero Section */}
@@ -11,7 +14,7 @@ export default function Contact() {
           <div className="absolute top-1/4 -right-32 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 -left-32 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         </div>
-        
+
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -25,7 +28,7 @@ export default function Contact() {
               We're Here to Help
             </h1>
             <p className="text-muted-foreground text-xl leading-relaxed">
-              Have questions about our products or need veterinary consultation? 
+              Have questions about our products or need veterinary consultation?
               Our team of experts is ready to assist you.
             </p>
           </motion.div>
@@ -61,10 +64,8 @@ export default function Contact() {
             <div className="w-full h-full bg-gradient-to-br from-muted to-accent/30 flex items-center justify-center">
               <div className="text-center p-8">
                 <MapPin className="w-12 h-12 text-primary mx-auto mb-4" />
-                <p className="text-muted-foreground text-lg max-w-md">
-                  123 Pharma Street, Industrial Area<br />
-                  City, State - 000000<br />
-                  India
+                <p className="text-muted-foreground text-lg max-w-md whitespace-pre-line">
+                  {settings?.address || "123 Pharma Street, Industrial Area\nCity, State - 000000\nIndia"}
                 </p>
               </div>
             </div>

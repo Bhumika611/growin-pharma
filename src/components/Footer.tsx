@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
+import { useSettings } from '@/contexts/SettingsContext';
 
 const footerLinks = {
   products: [
@@ -31,22 +32,23 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const { settings } = useSettings();
+
   return (
-    <footer className="bg-foreground text-background">
+    <footer className="bg-card text-foreground border-t border-border/40">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Main Footer */}
         <div className="py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link to="/" className="inline-block mb-6">
-              <span className="text-2xl font-heading font-bold">
-                GR<span className="text-primary">O</span>WIN
-                <span className="font-light ml-1 text-primary">PHARMA</span>
+              <span className="text-2xl font-heading font-bold text-foreground tracking-tight">
+                GROW<span className="text-primary">I</span>N
+                <span className="font-medium text-primary ml-1.5 tracking-wide">PHARMA</span>
               </span>
             </Link>
-            <p className="text-background/70 mb-6 max-w-sm">
-              Leading veterinary pharmaceutical company dedicated to developing 
-              innovative solutions for livestock health and farmer prosperity.
+            <p className="text-muted-foreground mb-6 max-w-sm font-body">
+              {settings?.about_text || "Leading veterinary pharmaceutical company dedicated to developing innovative solutions for livestock health and farmer prosperity."}
             </p>
             {/* Social Links */}
             <div className="flex gap-4">
@@ -55,7 +57,7 @@ export function Footer() {
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="w-10 h-10 bg-background/10 hover:bg-primary rounded-lg flex items-center justify-center transition-colors"
+                  className="w-10 h-10 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg flex items-center justify-center transition-all duration-300"
                 >
                   <social.icon size={18} />
                 </a>
@@ -65,13 +67,13 @@ export function Footer() {
 
           {/* Products */}
           <div>
-            <h4 className="font-heading font-bold text-lg mb-4">Products</h4>
+            <h4 className="font-heading font-bold text-lg mb-6 text-foreground">Products</h4>
             <ul className="space-y-3">
               {footerLinks.products.map((link) => (
                 <li key={link.name}>
                   <Link
                     to={link.href}
-                    className="text-background/70 hover:text-primary transition-colors"
+                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
                   >
                     {link.name}
                   </Link>
@@ -82,13 +84,13 @@ export function Footer() {
 
           {/* Company */}
           <div>
-            <h4 className="font-heading font-bold text-lg mb-4">Company</h4>
+            <h4 className="font-heading font-bold text-lg mb-6 text-foreground">Company</h4>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
                   <Link
                     to={link.href}
-                    className="text-background/70 hover:text-primary transition-colors"
+                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
                   >
                     {link.name}
                   </Link>
@@ -99,13 +101,13 @@ export function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="font-heading font-bold text-lg mb-4">Support</h4>
+            <h4 className="font-heading font-bold text-lg mb-6 text-foreground">Support</h4>
             <ul className="space-y-3">
               {footerLinks.support.map((link) => (
                 <li key={link.name}>
                   <Link
                     to={link.href}
-                    className="text-background/70 hover:text-primary transition-colors"
+                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
                   >
                     {link.name}
                   </Link>
@@ -116,16 +118,16 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="py-6 border-t border-background/10">
+        <div className="py-8 border-t border-border/40">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-background/60 text-sm">
-              © {new Date().getFullYear()} Growin Pharma. All rights reserved.
+            <p className="text-muted-foreground text-xs md:text-sm">
+              © {new Date().getFullYear()} {settings?.company_name || "Growin Pharma"}. All rights reserved.
             </p>
-            <div className="flex gap-6 text-sm">
-              <Link to="/privacy" className="text-background/60 hover:text-primary transition-colors">
+            <div className="flex gap-6 text-xs md:text-sm">
+              <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
                 Privacy Policy
               </Link>
-              <Link to="/terms" className="text-background/60 hover:text-primary transition-colors">
+              <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">
                 Terms of Service
               </Link>
             </div>

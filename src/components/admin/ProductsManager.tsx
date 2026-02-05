@@ -35,6 +35,7 @@ interface FormData {
   presentation: string;
   directions: string;
   description: string;
+  image_url: string;
   is_featured: boolean;
   is_new: boolean;
 }
@@ -49,6 +50,7 @@ const defaultFormData: FormData = {
   presentation: '',
   directions: '',
   description: '',
+  image_url: '',
   is_featured: false,
   is_new: false
 };
@@ -59,6 +61,7 @@ export function ProductsManager() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [formData, setFormData] = useState<FormData>(defaultFormData);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => { fetchProducts(); }, []);
@@ -70,16 +73,26 @@ export function ProductsManager() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.name) { 
-      toast({ title: 'Error', description: 'Name is required', variant: 'destructive' }); 
-      return; 
+    if (!formData.name) {
+      toast({ title: 'Error', description: 'Name is required', variant: 'destructive' });
+      return;
     }
-    
+
     if (editingProduct) {
-      await supabase.from('products').update(formData).eq('id', editingProduct.id);
+      const { error } = await supabase.from('products').update(formData).eq('id', editingProduct.id);
+      if (error) {
+        console.error('Error updating product:', error);
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        return;
+      }
       toast({ title: 'Product updated' });
     } else {
-      await supabase.from('products').insert([formData]);
+      const { error } = await supabase.from('products').insert([formData]);
+      if (error) {
+        console.error('Error creating product:', error);
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        return;
+      }
       toast({ title: 'Product created' });
     }
     setIsDialogOpen(false);
@@ -100,10 +113,45 @@ export function ProductsManager() {
       presentation: product.presentation || '',
       directions: product.directions || '',
       description: product.description || '',
+      image_url: product.image_url || '',
       is_featured: product.is_featured || false,
       is_new: product.is_new || false
     });
     setIsDialogOpen(true);
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      if (!event.target.files || event.target.files.length === 0) {
+        return;
+      }
+      setUploading(true);
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage.from('product-images').getPublicUrl(filePath);
+
+      setFormData({ ...formData, image_url: data.publicUrl });
+      toast({ title: 'Image uploaded successfully' });
+    } catch (error: any) {
+      toast({
+        title: 'Error uploading image',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -139,13 +187,13 @@ export function ProductsManager() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Name *</Label>
-                  <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                  <Input value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                 </div>
                 <div>
                   <Label>Category</Label>
-                  <Select 
-                    value={formData.category} 
-                    onValueChange={(v: ProductCategory) => setFormData({...formData, category: v})}
+                  <Select
+                    value={formData.category}
+                    onValueChange={(v: ProductCategory) => setFormData({ ...formData, category: v })}
                   >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -157,46 +205,76 @@ export function ProductsManager() {
                 </div>
               </div>
               <div>
+                <Label>Product Image</Label>
+                <div className="flex gap-4 items-center mt-2">
+                  {formData.image_url && (
+                    <img
+                      src={formData.image_url}
+                      alt="Preview"
+                      className="w-20 h-20 object-cover rounded-md border border-border"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploading}
+                    />
+                    {uploading && <p className="text-xs text-muted-foreground mt-1">Uploading...</p>}
+                  </div>
+                </div>
+              </div>
+              <div>
                 <Label>Description</Label>
-                <Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                <Textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
               </div>
               <div>
                 <Label>Composition</Label>
-                <Textarea value={formData.composition} onChange={e => setFormData({...formData, composition: e.target.value})} />
+                <Textarea value={formData.composition} onChange={e => setFormData({ ...formData, composition: e.target.value })} />
               </div>
               <div>
                 <Label>Indications</Label>
-                <Textarea value={formData.indications} onChange={e => setFormData({...formData, indications: e.target.value})} />
+                <Textarea value={formData.indications} onChange={e => setFormData({ ...formData, indications: e.target.value })} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Dosage</Label>
-                  <Input value={formData.dosage} onChange={e => setFormData({...formData, dosage: e.target.value})} />
+                  <Input value={formData.dosage} onChange={e => setFormData({ ...formData, dosage: e.target.value })} />
                 </div>
                 <div>
                   <Label>Withdrawal Period</Label>
-                  <Input value={formData.withdrawal_period} onChange={e => setFormData({...formData, withdrawal_period: e.target.value})} />
+                  <Input value={formData.withdrawal_period} onChange={e => setFormData({ ...formData, withdrawal_period: e.target.value })} />
                 </div>
               </div>
               <div>
                 <Label>Presentation</Label>
-                <Input value={formData.presentation} onChange={e => setFormData({...formData, presentation: e.target.value})} />
+                <Input value={formData.presentation} onChange={e => setFormData({ ...formData, presentation: e.target.value })} />
               </div>
               <div>
                 <Label>Directions</Label>
-                <Textarea value={formData.directions} onChange={e => setFormData({...formData, directions: e.target.value})} />
+                <Textarea value={formData.directions} onChange={e => setFormData({ ...formData, directions: e.target.value })} />
               </div>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2">
-                  <input type="checkbox" checked={formData.is_featured} onChange={e => setFormData({...formData, is_featured: e.target.checked})} />
+                  <input type="checkbox" checked={formData.is_featured} onChange={e => setFormData({ ...formData, is_featured: e.target.checked })} />
                   Featured
                 </label>
                 <label className="flex items-center gap-2">
-                  <input type="checkbox" checked={formData.is_new} onChange={e => setFormData({...formData, is_new: e.target.checked})} />
+                  <input type="checkbox" checked={formData.is_new} onChange={e => setFormData({ ...formData, is_new: e.target.checked })} />
                   New
                 </label>
               </div>
-              <Button onClick={handleSubmit}>{editingProduct ? 'Update' : 'Create'} Product</Button>
+              <Button onClick={handleSubmit} disabled={uploading}>
+                {uploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  editingProduct ? 'Update' : 'Create'
+                )} Product
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

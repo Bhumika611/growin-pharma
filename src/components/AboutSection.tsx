@@ -49,14 +49,15 @@ export function AboutSection() {
               Pioneering Animal Health Since Day One
             </h2>
             <p className="text-muted-foreground text-lg mb-6 leading-relaxed">
-              Growin Pharma is a leading veterinary pharmaceutical company dedicated to 
-              developing innovative solutions for livestock health. Our commitment to 
-              quality and animal welfare drives everything we do.
+              Growin Pharma is a leading veterinary pharmaceutical company dedicated to
+              developing innovative solutions for livestock health. Founded and led by
+              <span className="text-foreground font-semibold"> Vegina Suresh Kumar</span>,
+              who brings over <span className="text-primary font-bold">25+ years of experience</span> in the pharma field.
             </p>
             <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-              With a comprehensive range of feed supplements, dewormers, antibiotics, 
-              and health products, we support farmers in nurturing healthy, productive 
-              animals while ensuring sustainable agricultural practices.
+              Our commitment to quality and animal welfare drives everything we do. Under visionary
+              leadership, we support farmers in nurturing healthy, productive animals while
+              ensuring sustainable agricultural practices.
             </p>
 
             {/* Stats */}

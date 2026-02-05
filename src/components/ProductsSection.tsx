@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProductCard } from './ProductCard';
+import { supabase } from '@/integrations/supabase/client';
 
 const categories = [
   'All',
@@ -11,61 +12,57 @@ const categories = [
   'Mineral Mixtures',
 ];
 
-// Sample products data
-const sampleProducts = [
-  {
-    id: '1',
-    name: 'CalciMax Plus',
-    category: 'Feed Supplements',
-    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=300&fit=crop',
-    description: 'Premium calcium and phosphorus supplement for optimal bone health.',
-  },
-  {
-    id: '2',
-    name: 'VitaGrow 500',
-    category: 'Feed Supplements',
-    image: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=300&fit=crop',
-    description: 'Complete vitamin complex for enhanced growth and immunity.',
-  },
-  {
-    id: '3',
-    name: 'DeWorm Pro',
-    category: 'Dewormers',
-    image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=300&fit=crop',
-    description: 'Broad-spectrum anthelmintic for all livestock species.',
-  },
-  {
-    id: '4',
-    name: 'AntiBact 250',
-    category: 'Antibiotics',
-    image: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&h=300&fit=crop',
-    description: 'Effective antibiotic for bacterial infections in poultry and cattle.',
-  },
-  {
-    id: '5',
-    name: 'LiverCare Plus',
-    category: 'Liver Tonics',
-    image: 'https://images.unsplash.com/photo-1576602976047-174e57a47881?w=400&h=300&fit=crop',
-    description: 'Hepatoprotective formula for liver health and detoxification.',
-  },
-  {
-    id: '6',
-    name: 'MineralMix Pro',
-    category: 'Mineral Mixtures',
-    image: 'https://images.unsplash.com/photo-1585435557343-3b092031a831?w=400&h=300&fit=crop',
-    description: 'Complete mineral supplement with trace elements for optimal health.',
-  },
-];
+interface Product {
+  id: string;
+  name: string;
+  category: string;
+  image: string;
+  description: string;
+}
 
 export function ProductsSection() {
   const [activeCategory, setActiveCategory] = useState('All');
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('is_featured', { ascending: false }) // Prioritize featured
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      if (error) {
+        console.error('Error fetching products:', error);
+        return;
+      }
+
+      if (data) {
+        const formattedProducts = data.map(p => ({
+          id: p.id,
+          name: p.name,
+          category: p.category.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+          image: p.image_url || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=300&fit=crop',
+          description: p.description || ''
+        }));
+        setProducts(formattedProducts);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  };
 
   const filteredProducts = activeCategory === 'All'
-    ? sampleProducts
-    : sampleProducts.filter((p) => p.category === activeCategory);
+    ? products
+    : products.filter((p) => p.category === activeCategory);
 
   return (
-    <section id="products" className="py-24 bg-background">
+    <section id="products" className="py-24 bg-background relative overflow-hidden">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -81,7 +78,7 @@ export function ProductsSection() {
             Premium Veterinary Solutions
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Discover our comprehensive range of pharmaceutical products designed 
+            Discover our comprehensive range of pharmaceutical products designed
             for the health and well-being of your livestock.
           </p>
         </motion.div>
@@ -97,11 +94,10 @@ export function ProductsSection() {
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`px-5 py-2.5 rounded-full font-heading font-medium text-sm transition-all duration-300 ${
-                activeCategory === category
-                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
-                  : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-              }`}
+              className={`px-5 py-2.5 rounded-full font-heading font-medium text-sm transition-all duration-300 ${activeCategory === category
+                ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
+                : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                }`}
             >
               {category}
             </button>
