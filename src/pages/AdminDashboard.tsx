@@ -43,6 +43,16 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  useEffect(() => {
+    // Prevent auto-logout on refresh by checking the path in cleanup
+    return () => {
+      const currentPath = window.location.pathname;
+      if (!currentPath.startsWith('/admin')) {
+        signOut();
+      }
+    };
+  }, [signOut]);
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/admin/login');
